@@ -1,5 +1,4 @@
 var models = require('../models');
-var Promise = require('bluebird');
 
 module.exports = {
   messages: {
@@ -25,12 +24,12 @@ module.exports = {
   users: {
     // Ditto as above
     get: function (req, res) {
-      
+
     },
     post: function (req, res) {
-      // console.log('controller user posting');
-      // console.log(req.body);
       models.users.post(req.body.username);
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end();
     }
   }
 };

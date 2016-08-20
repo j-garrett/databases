@@ -1,4 +1,5 @@
 var db = require('../db');
+var Promise = require('bluebird');
 
 module.exports = {
   messages: {
@@ -8,7 +9,6 @@ module.exports = {
 
     }, 
     post: function (message) { // a function which can be used to insert a message into the database
-
       /////* insert insert actions to db here */////
       // parse the data and create a mysql query (insert into)
       var user = module.exports.users.get(message.username);
@@ -17,8 +17,17 @@ module.exports = {
       // Need to build fetcher of unique keys for room and usernames 
       var query = 'INSERT INTO messages (id, username_id, roomname_id, message) VALUES (NULL, ' + user + ',' + roomname + ',' + message + ');';
 
+      module.exports.users.get('jonjon')
+        .then(function(val) {
+          console.log('THIS IS THE RETURNED CONTENT: ', val);
 
-    } 
+        })
+        .catch(function(err) {
+          console.log('ERROR FOR GETTING CONTENT: ', err);
+
+        });
+
+    }
   },
 
   users: {
@@ -27,17 +36,31 @@ module.exports = {
       // get unique key for user 
       user = JSON.stringify(user);
       var query = 'SELECT id FROM users WHERE username = ' + user + ';';
-      var getUserId = function(cb) {
+
+      return new Promise(function(resolve, reject) {
         db.connection.query(query, function(err, content) {
           if (err) {
-            console.log('Users GET request error: ', err);
-            throw err;
+            reject(err);
+          } else {
+            resolve(content);
           }
-          console.log(content);
-          cb(content);
         });
-      };
-      db.connection.close();
+      });
+
+
+
+
+      // var getUserId = function(cb) {
+      //   db.connection.query(query, function(err, content) {
+      //     if (err) {
+      //       console.log('Users GET request error: ', err);
+      //       throw err;
+      //     }
+      //     console.log(content);
+      //     cb(content);
+      //   });
+      // };
+      db.connection.end();
     },
     post: function (user) {
       // db.connection.connect();
@@ -48,13 +71,24 @@ module.exports = {
       // Add field to users table of chat database
       // pass query string to query function
       // Provide a callback for any errors
-      db.connection.query(query, function(err) {
+
+      // DON'T ADD USER IF USER IS THERE
+
+      module.exports.users.get(user)
+        .then(function(val) {
+          console.log(val);
+        });
+
+
+
+      db.connection.query(query, function(err, content) {
         if (err) {
-          console.log(err);
+          console.log('USER POST QUERY ERROR: ', err);
         }
+        console.log('USER POST QUERY CONTENT: ', content);
       });
       // close connection to signal end of function
-      db.connection.close();
+      db.connection.end();
     }
   }
 };
