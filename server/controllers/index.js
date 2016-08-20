@@ -10,9 +10,9 @@ module.exports = {
       // console.log('REQUEST BY CONTROLLER TO MODEL IS: ', req.body);
       models.messages.get()
       .then(function(content) {
-        console.log('__controllers L11 content ', content);
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.end(content);
+        console.log('__controllers L11 content ', content[0].username_id);
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        res.end(JSON.stringify(content));
       })
       .catch(function(err) {
         // console.log(err);
@@ -29,7 +29,7 @@ module.exports = {
       // request will contain an object message/users
       // use models.messages.post to post it into database
       models.messages.post(req.body);
-      res.writeHead(201, {'Content-Type': 'text/html'});
+      // res.writeHead(200, {'Content-Type': 'text/html'});
       res.end();
     } // a function which handles posting a message to the database
   },
@@ -40,7 +40,7 @@ module.exports = {
     },
     post: function (req, res) {
       models.users.post(req.body.username);
-      res.writeHead(201, {'Content-Type': 'text/html'});
+      // res.writeHead(200, {'Content-Type': 'text/html'});
       res.end();
     }
   }

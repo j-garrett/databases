@@ -6,7 +6,7 @@ module.exports = {
     get: function () { // a function which produces all the messages
       /////* insert queries to db here */////
       return new Promise(function(resolve, reject) {
-        db.connection.query('SELECT * FROM messages', function(err, content) {
+        db.connection.query('SELECT * FROM messages;', function(err, content) {
           if (err) {
             console.log('error in models.messages.get: ', err);
             reject(err);
@@ -57,7 +57,6 @@ module.exports = {
                     if (err) {
                       console.log('Error inserting message: ', err);
                     }
-                    db.connection.end();
                   });
                 }
               }
@@ -82,7 +81,6 @@ module.exports = {
           }
         });
       });
-      db.connection.end();
     },
     post: function (user) {
 
