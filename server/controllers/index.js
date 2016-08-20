@@ -1,13 +1,12 @@
 var models = require('../models');
+var orm = require('../../orm-resources/orm-example.js');
+var Sequelize = require('sequelize');
+var db = new Sequelize('chat', 'root', 'new');
 var Promise = require('bluebird');
 
 module.exports = {
   messages: {
     get: function (req, res) {
-      // request will contain an object what message or user it wants
-      // then parse the the request into mysql query
-      // we then use models.messages.get to query it from database
-      // console.log('REQUEST BY CONTROLLER TO MODEL IS: ', req.body);
       models.messages.get()
       .then(function(content) {
         console.log('__controllers L11 content ', content[0].username_id);
@@ -19,19 +18,32 @@ module.exports = {
         res.writeHead(404, {'Content-Type': 'text/html'});
         res.end('ended with an error');
       });
-
-      // once we get the data from database
-      // write to response
-      // response.end()
-
-    }, // a function which handles a get request for all messages
+      // orm.User.sync()
+      //           .then(function() {
+      //             // Now instantiate an object and save it:
+      //             return User.create({username: 'Jean Valjean'});
+      //           })
+      //           .then(function() {
+      //             // Retrieve objects from the database:
+      //             return User.findAll({ where: {username: 'Jean Valjean'} });
+      //           })
+      //           .then(function(users) {
+      //             users.forEach(function(user) {
+      //               console.log(user.username + ' exists');
+      //             });
+      //             db.close();
+      //           })
+      //           .catch(function(err) {
+      //             // Handle any error in the chain
+      //             console.error('error: ', err);
+      //             db.close();
+      //           });
+    }, 
     post: function (req, res) {
-      // request will contain an object message/users
-      // use models.messages.post to post it into database
       models.messages.post(req.body);
       // res.writeHead(200, {'Content-Type': 'text/html'});
       res.end();
-    } // a function which handles posting a message to the database
+    } 
   },
 
   users: {
@@ -40,6 +52,18 @@ module.exports = {
     },
     post: function (req, res) {
       models.users.post(req.body.username);
+      // var username = req.body.username;
+      // orm.Users.sync()
+      //   .then(function() {
+      //     return User.create({username: 'BOBERTO'});
+      //   })
+      //   .catch(function(err) {
+      //     console.log('error', err);
+      //   });
+
+
+
+
       // res.writeHead(200, {'Content-Type': 'text/html'});
       res.end();
     }
