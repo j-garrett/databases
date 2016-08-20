@@ -9,7 +9,7 @@ module.exports = {
     get: function (req, res) {
       models.messages.get()
       .then(function(content) {
-        console.log('__controllers L11 content ', content[0].username_id);
+        // console.log('__controllers L11 content ', content[0].username_id);
         res.writeHead(200, {'Content-Type': 'application/json'});
         res.end(JSON.stringify(content));
       })
@@ -40,6 +40,10 @@ module.exports = {
       //           });
     }, 
     post: function (req, res) {
+
+      console.log('__controllers L29: ', req.body);
+      // request will contain an object message/users
+      // use models.messages.post to post it into database
       models.messages.post(req.body);
       // res.writeHead(200, {'Content-Type': 'text/html'});
       res.end();
