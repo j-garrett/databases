@@ -10,7 +10,7 @@ module.exports = {
       // console.log('REQUEST BY CONTROLLER TO MODEL IS: ', req.body);
       models.messages.get()
       .then(function(content) {
-        console.log('__controllers L11 content ', content[0].username_id);
+        // console.log('__controllers L11 content ', content[0].username_id);
         res.writeHead(200, {'Content-Type': 'application/json'});
         res.end(JSON.stringify(content));
       })
@@ -26,6 +26,7 @@ module.exports = {
 
     }, // a function which handles a get request for all messages
     post: function (req, res) {
+      console.log('__controllers L29: ', req.body);
       // request will contain an object message/users
       // use models.messages.post to post it into database
       models.messages.post(req.body);

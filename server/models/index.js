@@ -11,7 +11,7 @@ module.exports = {
             console.log('error in models.messages.get: ', err);
             reject(err);
           } else {
-            console.log('models.messages.get content result: ', content);
+            // console.log('models.messages.get content result: ', content);
             resolve(content);
           }
         });
@@ -22,9 +22,9 @@ module.exports = {
       // parse the data and create a mysql query (insert into)
       var user = message.username;
       var roomname = message.roomname; //JSON.stringify(message.roomname);
-      var message = JSON.stringify(message.message);
+      var message = JSON.stringify(message.text);
       // Need to build fetcher of unique keys for room and usernames 
-
+      console.log('__models L27 Incoming message to message post: ', message)
       // query for user id
       var queryId = 'SELECT id FROM users WHERE username = ' + JSON.stringify(user) + ';';
 
@@ -34,7 +34,7 @@ module.exports = {
 
       db.connection.query(queryId, function(err, content) {
         if (err) {
-          console.log(err);
+          console.log('__models: ', err);
         } else {
           if (content.length === 0) {
             module.exports.users.post(user);
@@ -42,16 +42,17 @@ module.exports = {
             var userId = content[0].id;
             db.connection.query(queryRoom, function(err, content) {
               if (err) {
-                console.log(err);
+                console.log('__models: ', err);
               } else {
                 if (content.length === 0) {
                   db.connection.query(queryAddRoom, function(err, content) {
                     if (err) {
-                      console.log(err);
+                      console.log('__models: ', err);
                     } 
                   });
                 } else {
                   var roomId = content[0].id;
+                  console.log('__models L55: ' + 'INSERT INTO messages (id, username_id, roomname_id, message) VALUES (NULL, ' + userId + ',' + roomId + ',' + message + ');');
                   var addMessage = 'INSERT INTO messages (id, username_id, roomname_id, message) VALUES (NULL, ' + userId + ',' + roomId + ',' + message + ');';
                   db.connection.query(addMessage, function(err, content) {
                     if (err) {
