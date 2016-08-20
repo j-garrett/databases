@@ -39,6 +39,6 @@ User.sync()
   })
   .catch(function(err) {
     // Handle any error in the chain
-    console.error(err);
+    console.error('error: ', err);
     db.close();
   });

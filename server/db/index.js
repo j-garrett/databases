@@ -12,7 +12,7 @@ var connection = mysql.createConnection({
   database: 'chat'
 });
 
-connection.connect();
+// connection.connect();
 // connection.query('SELECT * FROM messages', function(err, rows, fields) {
 //   if (err) {
 //     console.log(err);
@@ -23,3 +23,4 @@ connection.connect();
 //   }
 // });
 // connection.end();
+module.exports.connection = connection;
