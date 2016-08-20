@@ -3,37 +3,73 @@ var Promise = require('bluebird');
 
 module.exports = {
   messages: {
-    get: function (query) { // a function which produces all the messages
-
+    get: function () { // a function which produces all the messages
       /////* insert queries to db here */////
-
-    }, 
+      return new Promise(function(resolve, reject) {
+        db.connection.query('SELECT * FROM messages', function(err, content) {
+          if (err) {
+            console.log('error in models.messages.get: ', err);
+            reject(err);
+          } else {
+            console.log('models.messages.get content result: ', content);
+            resolve(content);
+          }
+        });
+      });
+    },
     post: function (message) { // a function which can be used to insert a message into the database
       /////* insert insert actions to db here */////
       // parse the data and create a mysql query (insert into)
-      var user = module.exports.users.get(message.username);
-      var roomname = 1; //JSON.stringify(message.roomname);
+      var user = message.username;
+      var roomname = message.roomname; //JSON.stringify(message.roomname);
       var message = JSON.stringify(message.message);
       // Need to build fetcher of unique keys for room and usernames 
-      var query = 'INSERT INTO messages (id, username_id, roomname_id, message) VALUES (NULL, ' + user + ',' + roomname + ',' + message + ');';
 
-      module.exports.users.get('jonjon')
-        .then(function(val) {
-          console.log('THIS IS THE RETURNED CONTENT: ', val);
+      // query for user id
+      var queryId = 'SELECT id FROM users WHERE username = ' + JSON.stringify(user) + ';';
 
-        })
-        .catch(function(err) {
-          console.log('ERROR FOR GETTING CONTENT: ', err);
+      // query for room id
+      var queryAddRoom = 'INSERT IGNORE INTO rooms (id, roomname) VALUES (NULL, ' + JSON.stringify(roomname) + ');';
+      var queryRoom = 'SELECT id FROM rooms WHERE roomname = ' + JSON.stringify(roomname) + ';';
 
-        });
-
+      db.connection.query(queryId, function(err, content) {
+        if (err) {
+          console.log(err);
+        } else {
+          if (content.length === 0) {
+            module.exports.users.post(user);
+          } else {
+            var userId = content[0].id;
+            db.connection.query(queryRoom, function(err, content) {
+              if (err) {
+                console.log(err);
+              } else {
+                if (content.length === 0) {
+                  db.connection.query(queryAddRoom, function(err, content) {
+                    if (err) {
+                      console.log(err);
+                    } 
+                  });
+                } else {
+                  var roomId = content[0].id;
+                  var addMessage = 'INSERT INTO messages (id, username_id, roomname_id, message) VALUES (NULL, ' + userId + ',' + roomId + ',' + message + ');';
+                  db.connection.query(addMessage, function(err, content) {
+                    if (err) {
+                      console.log('Error inserting message: ', err);
+                    }
+                    db.connection.end();
+                  });
+                }
+              }
+            });
+          }
+        }
+      });
     }
   },
 
   users: {
-    // Ditto as above.
     get: function (user) {
-      // get unique key for user 
       user = JSON.stringify(user);
       var query = 'SELECT id FROM users WHERE username = ' + user + ';';
 
@@ -46,49 +82,26 @@ module.exports = {
           }
         });
       });
-
-
-
-
-      // var getUserId = function(cb) {
-      //   db.connection.query(query, function(err, content) {
-      //     if (err) {
-      //       console.log('Users GET request error: ', err);
-      //       throw err;
-      //     }
-      //     console.log(content);
-      //     cb(content);
-      //   });
-      // };
       db.connection.end();
     },
     post: function (user) {
-      // db.connection.connect();
-      user = JSON.stringify(user);
-      // Build query string
-      var query = 'INSERT INTO users (id, username) VALUES (NULL, ' + user + ');';
-      // Open data base connection
-      // Add field to users table of chat database
-      // pass query string to query function
-      // Provide a callback for any errors
 
-      // DON'T ADD USER IF USER IS THERE
-
-      module.exports.users.get(user)
-        .then(function(val) {
-          console.log(val);
-        });
-
-
+      var query2 = 'INSERT IGNORE INTO users (id, username) VALUES (NULL, ' + JSON.stringify(user) + ');';
+      var query = 'select * from users where username = ' + JSON.stringify(user) + ';';
 
       db.connection.query(query, function(err, content) {
         if (err) {
-          console.log('USER POST QUERY ERROR: ', err);
+          console.log('user select error', err.code);
+        } else {
+          if (content.length === 0) {
+            db.connection.query(query2, function(err, content) {
+              if (err) {
+                console.log('user post error', err.code);
+              } 
+            });
+          }
         }
-        console.log('USER POST QUERY CONTENT: ', content);
       });
-      // close connection to signal end of function
-      db.connection.end();
     }
   }
 };
